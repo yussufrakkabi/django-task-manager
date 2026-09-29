@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Task Manager</title>
+</head>
+
+<body>
+
+    <h1>Welcome, {{ name}}!</h1>
+
+    <h2> My Tasks</h2>
+
+    <ul> 
+        {% for task in tasks %}
+            <li>{{ task }}</li>
+        {% endfor%}
+
+</body>
+</html>

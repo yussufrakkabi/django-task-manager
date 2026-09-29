@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Tasks</title>
+</head>
+
+<body>
+
+    <h1>My Tasks</h1>
+    {% if messages %}
+    {% for message in messages %}
+        <p>{{ message }}</p>
+    {% endfor %}
+{% endif %}
+
+    <form method="POST" action="{% url 'users:logout' %}">
+    {% csrf_token %}
+    <button type="submit">Logout</button>
+</form>
+
+    <a href="{% url 'tasks:task_create' %}">
+        Create Task
+    </a>
+
+    {% for task in tasks %}
+    <h2>{{ task.title }}</h2>
+    <p>{{ task.description }}</p>
+{% endfor %}
+
+    <hr>
+
+    {% for task in tasks %}
+
+        <h2>{{ task.title }}</h2>
+
+        <p>{{ task.description }}</p>
+
+        {% if task.completed %}
+            <p>Completed ✅</p>
+        {% else %}
+            <p>Not completed ❌</p>
+        {% endif %}
+
+        <a href="{% url 'tasks:task_update' task.id %}">
+            Edit
+        </a>
+
+        <a href="{% url 'tasks:task_delete' task.id %}">
+            Delete
+        </a>
+
+        <hr>
+
+    {% endfor %}
+
+</body>
+</html>
