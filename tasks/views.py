@@ -4,7 +4,13 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.contrib import messages
-
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from .serializers import TaskSerializer
+from rest_framework.viewsets import ModelViewSet
+from rest_framework.permissions import IsAuthenticated
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.filters import SearchFilter
 from .models import Task
 from .forms import TaskForm
 
@@ -177,3 +183,103 @@ def task_list(request):
         'tasks/task_list.html',
         {'tasks': tasks}
     )
+    
+class TaskListAPIView(APIView):
+
+    def get(self, request):
+        tasks = Task.objects.filter(owner=request.user)
+
+        serializer = TaskSerializer(tasks, many=True)
+
+        return Response(serializer.data)
+    
+    def post(self, request):
+        serializer = TaskSerializer(data=request.data)
+        
+        if serializer.is_valid():
+            serializer.save(owner=request.user)
+            return Response(serializer.data, status=201)
+        
+        return Response(serializer.errors, status=400)
+    
+
+class TaskDetailAPIView(APIView):
+    
+    def get_task(self, pk, user):
+        return get_object_or_404(
+            Task,
+            id=pk,
+            owner=user
+        )
+        
+    def get(self, request, pk):
+        task = self.get_task(pk, request.user)
+        
+        serializer = TaskSerializer(task)
+        
+        return Response(serializer.data)
+    
+    def put(self, request, pk):
+        task = self.get_task(pk, request.user)
+        
+        serializer = TaskSerializer(
+            task,
+            data=request.data
+        )
+        
+        if serializer.is_valid():
+            serializer.save(owner=request.user)
+            return Response(serializer.data)
+        
+        return Response(
+            serializer.errors,
+            status=400
+        )
+        
+    def patch(self, request, pk):
+        task = self.get_task(pk, request.user)
+        
+        serializer = TaskSerializer(
+            task,
+            data=request.data,
+            partial=True
+        )
+        
+        if serializer.is_valid():
+            serializer.save(owner=request.user)
+            return Response(serializer.data)
+        
+        return Response(
+            serializer.errors,
+            status=400
+        )
+        
+    def delete(self, request, pk):
+        task = self.get_task(pk, request.user)
+        
+        task.delete()
+        
+        return Response(status=204)
+    
+class TaskViewSet(ModelViewSet):
+    serializer_class = TaskSerializer
+    permission_classes = [IsAuthenticated]
+    
+    filter_backends = [
+        DjangoFilterBackend,
+        SearchFilter,
+        ]
+    filterset_fields = ['completed']
+    
+    search_fields = [
+        'title',
+        'description',
+        ]
+    
+    def get_queryset(self):
+        return Task.objects.filter(owner=self.request.user)
+    
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
+        
+        
