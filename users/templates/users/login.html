@@ -1,13 +1,21 @@
-<h1>Login</h1>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Manager Login</title>
+</head>
+<body>
+    <h1>Task Manager Login</h1>
 
-<form method="POST">
-    {% csrf_token %}
+    {% if form.errors %}
+        <p>Invalid username or password. Please try again.</p>
+    {% endif %}
 
-    {{ form.as_p }}
-
-    <button type="submit">Login</button>
-</form>
-
-<a href="{% url 'users:register' %}">
-    Create account
-</a>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Log in</button>
+    </form>
+</body>
+</html>

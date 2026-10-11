@@ -1,6 +1,6 @@
 from django.urls import path
 from rest_framework.routers import DefaultRouter
-from .views import TaskViewSet
+
 from .views import(
     TaskListView,
     TaskCreateView,
@@ -9,6 +9,11 @@ from .views import(
     TaskListAPIView,
     TaskDetailAPIView,
     TaskViewSet,
+)
+
+from drf_spectacular.views import (
+    SpectacularAPIView,
+    SpectacularSwaggerView,
 )
 
 
@@ -29,6 +34,19 @@ urlpatterns = [
          TaskDetailAPIView.as_view(),
          name='api_task_detail'
          ),
+    
+    path(
+    'api/schema/',
+    SpectacularAPIView.as_view(),
+    name='schema',
+),
+
+    path(
+        'api/docs/',
+        SpectacularSwaggerView.as_view(url_name='tasks:schema'),
+        name='swagger-ui',
+),
+    
 ]
 
 router = DefaultRouter()
