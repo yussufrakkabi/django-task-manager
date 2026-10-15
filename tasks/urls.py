@@ -30,10 +30,7 @@ urlpatterns = [
     
     path('api/tasks/', TaskListAPIView.as_view(), name='api_task_list'),
     
-    path('api/tasks/<int:pk>/',
-         TaskDetailAPIView.as_view(),
-         name='api_task_detail'
-         ),
+    path('api/tasks/<int:pk>/', TaskDetailAPIView.as_view(), name='api_task_detail' ),
     
     path(
     'api/schema/',

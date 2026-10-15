@@ -186,6 +186,7 @@ def task_list(request):
     )
     
 class TaskListAPIView(APIView):
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
         tasks = Task.objects.filter(owner=request.user)
@@ -205,6 +206,7 @@ class TaskListAPIView(APIView):
     
 
 class TaskDetailAPIView(APIView):
+    permission_classes = [IsAuthenticated]
     
     def get_task(self, pk, user):
         return get_object_or_404(
@@ -278,7 +280,9 @@ class TaskViewSet(ModelViewSet):
         ]
     
     def get_queryset(self):
-        return Task.objects.filter(owner=self.request.user)
+        return Task.objects.filter(
+            owner=self.request.user
+            ).order_by('id')
     
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
