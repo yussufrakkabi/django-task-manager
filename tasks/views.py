@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from drf_spectacular.utils import extend_schema
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -186,7 +187,13 @@ def task_list(request):
     )
     
 class TaskListAPIView(APIView):
+    serializer_class = TaskSerializer
     permission_classes = [IsAuthenticated]
+    
+    @extend_schema(
+        operation_id = "list_tasks",
+        responses = TaskSerializer(many=True)
+    )
 
     def get(self, request):
         tasks = Task.objects.filter(owner=request.user)
@@ -206,6 +213,7 @@ class TaskListAPIView(APIView):
     
 
 class TaskDetailAPIView(APIView):
+    serializer_class = TaskSerializer
     permission_classes = [IsAuthenticated]
     
     def get_task(self, pk, user):
@@ -215,6 +223,10 @@ class TaskDetailAPIView(APIView):
             owner=user
         )
         
+    @extend_schema(
+        operation_id = "retrieve_user_task",
+        responses = TaskSerializer
+    )
     def get(self, request, pk):
         task = self.get_task(pk, request.user)
         
@@ -280,6 +292,10 @@ class TaskViewSet(ModelViewSet):
         ]
     
     def get_queryset(self):
+        if getattr(self, 'swagger_fake_view', False):
+            return Task.objects.none()
+        
+        
         return Task.objects.filter(
             owner=self.request.user
             ).order_by('id')
