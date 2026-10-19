@@ -200,3 +200,8 @@ SESSION_COOKIE_SECURE = not DEBUG
 CSRF_COOKIE_SECURE = not DEBUG
 
 SECURE_HSTS_SECONDS = 0
+
+# Authentication redirects
+LOGIN_URL = '/users/login/'
+LOGIN_REDIRECT_URL = '/tasks/'
+LOGOUT_REDIRECT_URL = '/users/login/'
