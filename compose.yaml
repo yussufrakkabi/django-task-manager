@@ -1,0 +1,13 @@
+
+services:
+  web:
+    build: .
+    image: django-task-manager
+    container_name: django-task-manager
+    ports:
+      - "127.0.0.1:8000:8000"
+    env_file:
+      - .env
+    environment:
+      DJANGO_ALLOWED_HOSTS: "127.0.0.1,localhost"
+    restart: unless-stopped
