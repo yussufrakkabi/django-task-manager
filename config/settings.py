@@ -195,6 +195,7 @@ SPECTACULAR_SETTINGS = {
 }
 
 # Production security settings
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 SECURE_SSL_REDIRECT = not DEBUG
 
@@ -204,6 +205,7 @@ CSRF_COOKIE_SECURE = not DEBUG
 
 SECURE_HSTS_SECONDS = 0
 
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 # Authentication redirects
 LOGIN_URL = '/users/login/'
 LOGIN_REDIRECT_URL = '/tasks/'
