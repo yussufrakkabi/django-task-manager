@@ -214,3 +214,7 @@ SECURE_PROXY_SSL_HEADER = (
 LOGIN_URL = '/users/login/'
 LOGIN_REDIRECT_URL = '/tasks/'
 LOGOUT_REDIRECT_URL = '/users/login/'
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://django-task-manager.onrender.com",
+]
