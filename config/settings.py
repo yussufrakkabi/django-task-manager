@@ -194,18 +194,22 @@ SPECTACULAR_SETTINGS = {
     'SERVE_INCLUDE_SCHEMA': False,
 }
 
+
 # Production security settings
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 SECURE_SSL_REDIRECT = not DEBUG
 
 SESSION_COOKIE_SECURE = not DEBUG
-
 CSRF_COOKIE_SECURE = not DEBUG
 
 SECURE_HSTS_SECONDS = 0
 
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+# Enable only behind a trusted HTTPS reverse proxy
+SECURE_PROXY_SSL_HEADER = (
+    "HTTP_X_FORWARDED_PROTO",
+    "https",
+)
+
 # Authentication redirects
 LOGIN_URL = '/users/login/'
 LOGIN_REDIRECT_URL = '/tasks/'
