@@ -1,5 +1,6 @@
 
 # Django Task Manager
+[![Django CI](https://github.com/yussufrakkabi/django-task-manager/actions/workflows/django-tests.yml/badge.svg)](https://github.com/yussufrakkabi/django-task-manager/actions/workflows/django-tests.yml)
 
 A task management web application and REST API built with Django and Django REST Framework.
 
