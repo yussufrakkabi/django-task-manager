@@ -1,10 +1,10 @@
-from django.test import TestCase
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from rest_framework import status
 from rest_framework.test import APITestCase
-# Create your tests here.
 
 from .models import Task
+
+User = get_user_model()
 
 
 class TaskAPISecurityTests(APITestCase):
@@ -218,5 +218,14 @@ class TaskViewSetSecurityTests(APITestCase):
 
         created_task = Task.objects.get(pk=response.data["id"])
         self.assertEqual(created_task.owner, self.user1)
-        
-        
+    
+    def test_unauthenticated_user_cannot_list_tasks(self):
+        response = self.client.get(self.list_url)
+
+        self.assertIn(
+            response.status_code,
+            [
+                status.HTTP_401_UNAUTHORIZED,
+                status.HTTP_403_FORBIDDEN,
+            ]
+    )
