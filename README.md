@@ -77,6 +77,104 @@ flowchart TD
 | DELETE | /tasks/api/viewset/tasks/{id}/ | Delete task |
 | GET | /tasks/api/docs/ | Swagger documentation |
 
+
+
+## API Usage Examples
+
+Base URL:
+
+http://127.0.0.1:8000
+
+### Authentication
+
+Task endpoints require authentication.
+
+For local development, log in through:
+
+http://127.0.0.1:8000/users/login/
+
+The application uses Django session authentication.
+
+### List Tasks
+
+GET /tasks/api/tasks/
+
+Example response:
+
+```json
+[
+  {
+    "id": 1,
+    "title": "Learn Django REST Framework",
+    "description": "Practice API development",
+    "completed": false,
+    "owner": 1
+  }
+]
+```
+
+Only tasks belonging to the authenticated user are returned.
+
+### Create Task
+
+POST /tasks/api/tasks/
+
+Request body:
+
+```json
+{
+  "title": "Build REST API",
+  "description": "Create Django API endpoints",
+  "completed": false
+}
+```
+
+Expected status: 201 Created
+
+The backend automatically assigns the authenticated user
+as the task owner.
+
+### Retrieve Task
+
+GET /tasks/api/tasks/1/
+
+Expected status: 200 OK
+
+### Update Task
+
+PATCH /tasks/api/viewset/tasks/1/
+
+Request body:
+
+```json
+{
+  "completed": true
+}
+```
+
+Expected status: 200 OK
+
+### Delete Task
+
+DELETE /tasks/api/viewset/tasks/1/
+
+Expected status: 204 No Content
+
+### Security
+
+- Authentication is required for task operations.
+- Users can access only their own tasks.
+- Accessing another user's task returns 404.
+- Task ownership is enforced by the backend.
+
+### Interactive API Documentation
+
+Swagger UI:
+
+http://127.0.0.1:8000/tasks/api/docs/
+
+
+
 ## Run Locally with Docker
 
 1. Clone the repository.
