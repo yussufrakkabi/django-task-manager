@@ -1,8 +1,9 @@
 from django.contrib.auth import get_user_model
 from rest_framework import status
 from rest_framework.test import APITestCase
-
 from .models import Task
+from django.test import TestCase
+from django.urls import reverse
 
 User = get_user_model()
 
@@ -229,3 +230,199 @@ class TaskViewSetSecurityTests(APITestCase):
                 status.HTTP_403_FORBIDDEN,
             ]
     )
+        
+
+from django.test import TestCase
+from django.contrib.auth import get_user_model
+from django.urls import reverse
+
+from .models import Task
+
+
+class TaskDashboardTests(TestCase):
+
+    def setUp(self):
+        User = get_user_model()
+
+        self.user = User.objects.create_user(
+            username="dashboarduser",
+            password="TestPassword123!"
+        )
+
+        self.other_user = User.objects.create_user(
+            username="otheruser",
+            password="TestPassword123!"
+        )
+
+        Task.objects.create(
+            title="Learn Django",
+            description="Practice backend development",
+            completed=False,
+            owner=self.user
+        )
+
+        Task.objects.create(
+            title="Learn Docker",
+            description="Practice containers",
+            completed=True,
+            owner=self.user
+        )
+
+        Task.objects.create(
+            title="Private task",
+            description="Another user's task",
+            completed=False,
+            owner=self.other_user
+        )
+
+        self.client.force_login(self.user)
+
+    def test_search_tasks(self):
+        url = reverse("tasks:task_list")
+
+        response = self.client.get(url, {
+            "search": "Django"
+        })
+
+        self.assertEqual(response.status_code, 200)
+
+        self.assertContains(response, "Learn Django")
+        self.assertNotContains(response, "Learn Docker")
+        self.assertNotContains(response, "Private task")
+        
+        
+    
+    def test_filter_completed_tasks(self):
+        url = reverse("tasks:task_list")
+
+        response = self.client.get(url, {
+            "status": "completed"
+        })
+
+        self.assertEqual(response.status_code, 200)
+
+        self.assertContains(response, "Learn Docker")
+        self.assertNotContains(response, "Learn Django")
+        self.assertNotContains(response, "Private task")
+
+    def test_filter_pending_tasks(self):
+        url = reverse("tasks:task_list")
+
+        response = self.client.get(url, {
+            "status": "pending"
+        })
+
+        self.assertEqual(response.status_code, 200)
+
+        self.assertContains(response, "Learn Django")
+        self.assertNotContains(response, "Learn Docker")
+        self.assertNotContains(response, "Private task")
+        
+    
+    
+    def test_task_pagination(self):
+        # Create 6 additional tasks for the logged-in user
+        for i in range(6):
+            Task.objects.create(
+                title=f"Pagination Task {i}",
+                description="Testing pagination",
+                completed=False,
+                owner=self.user
+            )
+
+        url = reverse("tasks:task_list")
+
+        # First page
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.context["is_paginated"])
+        self.assertEqual(len(response.context["tasks"]), 5)
+        self.assertEqual(
+            response.context["paginator"].num_pages,
+            2
+        )
+
+        # Second page
+        response = self.client.get(url, {"page": 2})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context["tasks"]), 3)
+        
+        
+    
+    def test_complete_task(self):
+        task = Task.objects.get(
+            title="Learn Django",
+            owner=self.user
+        )
+
+        url = reverse(
+            "tasks:task_toggle",
+            args=[task.pk]
+        )
+
+        response = self.client.post(url)
+
+        task.refresh_from_db()
+
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(task.completed)
+
+    def test_reopen_task(self):
+        task = Task.objects.get(
+            title="Learn Docker",
+            owner=self.user
+        )
+
+        url = reverse(
+            "tasks:task_toggle",
+            args=[task.pk]
+        )
+
+        response = self.client.post(url)
+
+        task.refresh_from_db()
+
+        self.assertEqual(response.status_code, 302)
+        self.assertFalse(task.completed)
+
+    def test_cannot_toggle_another_users_task(self):
+        task = Task.objects.get(
+            title="Private task",
+            owner=self.other_user
+        )
+
+        url = reverse(
+            "tasks:task_toggle",
+            args=[task.pk]
+        )
+
+        response = self.client.post(url)
+
+        task.refresh_from_db()
+
+        self.assertEqual(response.status_code, 404)
+        self.assertFalse(task.completed)
+        
+    
+    def test_cannot_toggle_task_with_get(self):
+        task = Task.objects.get(
+            title="Learn Django",
+            owner=self.user
+        )
+
+        url = reverse(
+            "tasks:task_toggle",
+            args=[task.pk]
+        )
+
+        response = self.client.get(url)
+
+        task.refresh_from_db()
+
+        # GET requests must not modify tasks
+        self.assertEqual(response.status_code, 405)
+        self.assertFalse(task.completed)
+
+

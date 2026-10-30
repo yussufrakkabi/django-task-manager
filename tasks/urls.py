@@ -1,5 +1,7 @@
 from django.urls import path
 from rest_framework.routers import DefaultRouter
+from . import views
+from users import views as user_views
 
 from .views import(
     TaskListView,
@@ -42,6 +44,12 @@ urlpatterns = [
         'api/docs/',
         SpectacularSwaggerView.as_view(url_name='tasks:schema'),
         name='swagger-ui',
+),
+    
+    path(
+    "<int:pk>/toggle/",
+    views.toggle_task_status,
+    name="task_toggle"
 ),
     
 ]

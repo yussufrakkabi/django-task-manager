@@ -1,24 +1,64 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Create Task</title>
-</head>
 
-<body>
+{% extends "base.html" %}
 
-    <h1>Create Task</h1>
+{% block title %}
+    {% if object %}Edit Task{% else %}Create Task{% endif %}
+{% endblock %}
 
-    <form method="POST">
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-7 col-lg-6">
+        <div class="card">
+            <div class="card-body p-4">
 
-        {% csrf_token %}
+                <h3 class="fw-bold mb-2">
+                    {% if object %}
+                        Edit Task
+                    {% else %}
+                        Create New Task
+                    {% endif %}
+                </h3>
 
-        {{ form.as_p }}
+                <p class="text-muted mb-4">
+                    Add or update your task details.
+                </p>
 
-        <button type="submit">
-            Create Task
-        </button>
+                <form method="post">
+                    {% csrf_token %}
 
-    </form>
+                    {% for field in form %}
+                        <div class="mb-3">
+                            <label for="{{ field.id_for_label }}"
+                                   class="form-label fw-semibold">
+                                {{ field.label }}
+                            </label>
 
-</body>
-</html>
+                            <div>
+                                {{ field }}
+                            </div>
+
+                            {% for error in field.errors %}
+                                <div class="text-danger small">
+                                    {{ error }}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endfor %}
+
+                    <div class="d-flex gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary">
+                            Save Task
+                        </button>
+
+                        <a href="{% url 'tasks:task_list' %}"
+                           class="btn btn-outline-secondary">
+                            Cancel
+                        </a>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

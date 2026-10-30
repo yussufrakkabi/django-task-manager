@@ -1,57 +1,192 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>My Tasks</title>
-</head>
 
-<body>
+{% extends "base.html" %}
 
-    <h1>My Tasks</h1>
-    {% if messages %}
-    {% for message in messages %}
-        <p>{{ message }}</p>
-    {% endfor %}
-{% endif %}
+{% block title %}Dashboard | Task Manager{% endblock %}
 
-    <form method="POST" action="{% url 'users:logout' %}">
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="fw-bold">My Tasks</h2>
+        <p class="text-muted">Organize and track your work.</p>
+    </div>
+
+    <a href="{% url 'tasks:task_create' %}"
+       class="btn btn-primary">
+        + New Task
+    </a>
+</div>
+
+<!-- Statistics -->
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card p-4">
+            <p class="text-muted mb-1">Total Tasks</p>
+            <h2 class="fw-bold">{{ total_tasks }}</h2>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card p-4">
+            <p class="text-muted mb-1">Completed</p>
+            <h2 class="fw-bold text-success">
+                {{ completed_tasks }}
+            </h2>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card p-4">
+            <p class="text-muted mb-1">Pending</p>
+            <h2 class="fw-bold text-warning">
+                {{ pending_tasks }}
+            </h2>
+        </div>
+    </div>
+</div>
+
+<!-- Search and Filter -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-7">
+                <input
+                    type="text"
+                    name="search"
+                    class="form-control"
+                    placeholder="Search tasks..."
+                    value="{{ search }}"
+                >
+            </div>
+
+            <div class="col-md-3">
+                <select name="status" class="form-select">
+                    <option value="all"
+                        {% if status == "all" %}selected{% endif %}>
+                        All Tasks
+                    </option>
+
+                    <option value="completed"
+                        {% if status == "completed" %}selected{% endif %}>
+                        Completed
+                    </option>
+
+                    <option value="pending"
+                        {% if status == "pending" %}selected{% endif %}>
+                        Pending
+                    </option>
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <button class="btn btn-primary w-100">
+                    Filter
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Task List -->
+<div class="card">
+    <div class="card-body p-4">
+
+        {% for task in tasks %}
+        <div class="d-flex justify-content-between
+                    align-items-center border-bottom py-3 gap-3">
+
+            <div>
+                <h5 class="fw-semibold">{{ task.title }}</h5>
+                <p class="text-muted mb-2">
+                    {{ task.description }}
+                </p>
+
+                {% if task.completed %}
+                    <span class="badge bg-success">
+                        Completed
+                    </span>
+                {% else %}
+                    <span class="badge bg-warning text-dark">
+                        Pending
+                    </span>
+                {% endif %}
+            </div>
+
+            <div class="d-flex gap-2">
+                
+<form method="post"
+      action="{% url 'tasks:task_toggle' task.pk %}">
     {% csrf_token %}
-    <button type="submit">Logout</button>
+
+    {% if task.completed %}
+        <button type="submit"
+                class="btn btn-outline-warning btn-sm">
+            Reopen
+        </button>
+    {% else %}
+        <button type="submit"
+                class="btn btn-outline-success btn-sm">
+            Complete
+        </button>
+    {% endif %}
 </form>
 
-    <a href="{% url 'tasks:task_create' %}">
-        Create Task
-    </a>
+                <a href="{% url 'tasks:task_update' task.pk %}"
+                   class="btn btn-outline-primary btn-sm">
+                    Edit
+                </a>
 
-    {% for task in tasks %}
-    <h2>{{ task.title }}</h2>
-    <p>{{ task.description }}</p>
-{% endfor %}
+                <a href="{% url 'tasks:task_delete' task.pk %}"
+                   class="btn btn-outline-danger btn-sm">
+                    Delete
+                </a>
+            </div>
+        </div>
 
-    <hr>
+        {% empty %}
+        <div class="text-center py-5">
+            <h5>No matching tasks</h5>
+            <p class="text-muted">
+                Try changing your search or filter.
+            </p>
+        </div>
+        {% endfor %}
 
-    {% for task in tasks %}
+    </div>
+</div>
 
-        <h2>{{ task.title }}</h2>
 
-        <p>{{ task.description }}</p>
+{% if is_paginated %}
+<nav class="mt-4" aria-label="Task pagination">
+    <ul class="pagination justify-content-center">
 
-        {% if task.completed %}
-            <p>Completed ✅</p>
-        {% else %}
-            <p>Not completed ❌</p>
+        {% if page_obj.has_previous %}
+        <li class="page-item">
+            <a class="page-link"
+               href="?page={{ page_obj.previous_page_number }}&search={{ search|urlencode }}&status={{ status|urlencode }}">
+                Previous
+            </a>
+        </li>
         {% endif %}
 
-        <a href="{% url 'tasks:task_update' task.id %}">
-            Edit
-        </a>
+        <li class="page-item disabled">
+            <span class="page-link">
+                Page {{ page_obj.number }} of {{ paginator.num_pages }}
+            </span>
+        </li>
 
-        <a href="{% url 'tasks:task_delete' task.id %}">
-            Delete
-        </a>
+        {% if page_obj.has_next %}
+        <li class="page-item">
+            <a class="page-link"
+               href="?page={{ page_obj.next_page_number }}&search={{ search|urlencode }}&status={{ status|urlencode }}">
+                Next
+            </a>
+        </li>
+        {% endif %}
 
-        <hr>
+    </ul>
+</nav>
+{% endif %}
 
-    {% endfor %}
 
-</body>
-</html>
+{% endblock %}
