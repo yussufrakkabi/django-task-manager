@@ -1,50 +1,48 @@
-
 # Django Task Manager
-[![Django CI](https://github.com/yussufrakkabi/django-task-manager/actions/workflows/django-tests.yml/badge.svg)](https://github.com/yussufrakkabi/django-task-manager/actions/workflows/django-tests.yml)
 
-A task management web application and REST API built with Django and Django REST Framework.
+A full-stack task management application built with **Python, Django, Django REST Framework, and PostgreSQL**.
+
+The project demonstrates backend development skills through secure REST APIs, user authentication, database integration, automated testing, and containerization. It also includes a responsive frontend built with Django templates and Bootstrap 5.
 
 ## Features
 
-- User authentication
+- User authentication and protected pages
 - Create, read, update, and delete tasks
-- User-specific task management
-- REST API endpoints
-- Search, filtering, and pagination
-- Swagger/OpenAPI documentation
-- PostgreSQL database support
+- Complete and reopen tasks
+- Task search and status filtering
+- Dashboard statistics and pagination
+- User-specific task ownership and access control
+- REST API with Swagger/OpenAPI documentation
+- PostgreSQL database integration
 - Docker containerization
-- Automated Django tests
+- GitHub Actions continuous integration
+- 20 automated Django tests
 
 ## Tech Stack
 
-- Python
-- Django
-- Django REST Framework
-- PostgreSQL (Neon)
-- Docker and Docker Compose
-- Gunicorn
-- WhiteNoise
-- Git and GitHub
-
+| Category | Technologies |
+|---|---|
+| Backend | Python, Django, Django REST Framework |
+| Frontend | HTML, CSS, Bootstrap 5 |
+| Database | PostgreSQL (Neon) |
+| API Documentation | drf-spectacular, Swagger UI |
+| Infrastructure | Docker, Docker Compose, Gunicorn, WhiteNoise |
+| Testing | Django TestCase, DRF APITestCase |
+| CI/CD | GitHub Actions |
+| Version Control | Git and GitHub |
 
 ## Project Architecture
 
-The application uses Django and Django REST Framework
-to provide both a web interface and REST API.
+The application uses Django and Django REST Framework to provide both a web interface and a REST API.
 
-### Components
-
-- **Django:** Handles authentication, web views, and business logic.
-- **Django REST Framework:** Provides API endpoints, serializers, and permissions.
-- **PostgreSQL:** Stores users and tasks.
-- **Docker:** Containerizes the application.
-- **Gunicorn:** Runs the Django WSGI application.
-- **WhiteNoise:** Serves static files.
-- **Swagger/OpenAPI:** Documents API endpoints.
-- **GitHub Actions:** Runs automated tests on pushes and pull requests.
-
-### Architecture Diagram
+- **Django:** authentication, web views, and business logic
+- **Django REST Framework:** API endpoints, serializers, and permissions
+- **PostgreSQL:** stores users and tasks
+- **Docker:** containerizes the application
+- **Gunicorn:** runs the Django WSGI application
+- **WhiteNoise:** serves static files
+- **Swagger/OpenAPI:** documents API endpoints
+- **GitHub Actions:** runs automated tests on pushes and pull requests
 
 ```mermaid
 flowchart TD
@@ -57,49 +55,43 @@ flowchart TD
     G[GitHub Actions CI] --> H[Automated Django Tests]
 ```
 
-### Security
+## Security
 
-- Authentication required for task operations.
-- Users can access only their own tasks.
-- Task ownership is assigned by the backend.
-- Database credentials are stored in environment variables.
-- Docker runs the application as a non-root user.
+- Authentication is required for protected pages and all task API endpoints
+- Users can access only their own tasks; ownership is enforced at the database-query level
+- Accessing another user's task returns `404`
+- Task ownership is assigned by the backend, never by the client
+- CSRF protection for Django forms
+- Secrets and database credentials are stored in environment variables
+- Docker runs the application as a non-root user
+- Automated tests cover unauthorized access
 
+## API
 
-## API Endpoints
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | /tasks/api/viewset/tasks/ | List tasks |
-| POST | /tasks/api/viewset/tasks/ | Create task |
-| GET | /tasks/api/viewset/tasks/{id}/ | Retrieve task |
-| PUT | /tasks/api/viewset/tasks/{id}/ | Update task |
-| DELETE | /tasks/api/viewset/tasks/{id}/ | Delete task |
-| GET | /tasks/api/docs/ | Swagger documentation |
-
-
-
-## API Usage Examples
-
-Base URL:
-
-http://127.0.0.1:8000
+Base URL (local): `http://127.0.0.1:8000`
 
 ### Authentication
 
-Task endpoints require authentication.
+The API uses Django session authentication. For local development, log in at
+`http://127.0.0.1:8000/users/login/`.
 
-For local development, log in through:
+### Endpoints
 
-http://127.0.0.1:8000/users/login/
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/tasks/api/tasks/` | List your tasks |
+| POST | `/tasks/api/tasks/` | Create a task |
+| GET | `/tasks/api/tasks/<id>/` | Retrieve a task |
+| GET | `/tasks/api/viewset/tasks/` | List tasks (filtering and pagination) |
+| POST | `/tasks/api/viewset/tasks/` | Create a task |
+| GET | `/tasks/api/viewset/tasks/<id>/` | Retrieve a task |
+| PUT / PATCH | `/tasks/api/viewset/tasks/<id>/` | Update a task |
+| DELETE | `/tasks/api/viewset/tasks/<id>/` | Delete a task |
+| GET | `/tasks/api/docs/` | Swagger UI documentation |
 
-The application uses Django session authentication.
+### Examples
 
-### List Tasks
-
-GET /tasks/api/tasks/
-
-Example response:
+**List tasks** — `GET /tasks/api/tasks/`
 
 ```json
 [
@@ -113,13 +105,7 @@ Example response:
 ]
 ```
 
-Only tasks belonging to the authenticated user are returned.
-
-### Create Task
-
-POST /tasks/api/tasks/
-
-Request body:
+**Create a task** — `POST /tasks/api/tasks/` (returns `201 Created`)
 
 ```json
 {
@@ -129,22 +115,9 @@ Request body:
 }
 ```
 
-Expected status: 201 Created
+The authenticated user is automatically assigned as the owner.
 
-The backend automatically assigns the authenticated user
-as the task owner.
-
-### Retrieve Task
-
-GET /tasks/api/tasks/1/
-
-Expected status: 200 OK
-
-### Update Task
-
-PATCH /tasks/api/viewset/tasks/1/
-
-Request body:
+**Update a task** — `PATCH /tasks/api/viewset/tasks/1/` (returns `200 OK`)
 
 ```json
 {
@@ -152,65 +125,52 @@ Request body:
 }
 ```
 
-Expected status: 200 OK
+**Delete a task** — `DELETE /tasks/api/viewset/tasks/1/` (returns `204 No Content`)
 
-### Delete Task
-
-DELETE /tasks/api/viewset/tasks/1/
-
-Expected status: 204 No Content
-
-### Security
-
-- Authentication is required for task operations.
-- Users can access only their own tasks.
-- Accessing another user's task returns 404.
-- Task ownership is enforced by the backend.
-
-### Interactive API Documentation
-
-Swagger UI:
-
-http://127.0.0.1:8000/tasks/api/docs/
-
-
+Interactive documentation: http://127.0.0.1:8000/tasks/api/docs/
 
 ## Run Locally with Docker
 
 1. Clone the repository.
-2. Create a `.env` file containing the required environment variables.
-3. Start the application:
+2. Create a `.env` file in the project root with the required environment variables, for example:
 
-```bash
-docker compose up -d --build
-```
+   ```env
+   SECRET_KEY=your-secret-key
+   DEBUG=True
+   DATABASE_URL=postgresql://user:password@host:5432/dbname
+   ```
+
+   Adjust the names to match your `settings.py`.
+
+3. Build and start the application:
+
+   ```bash
+   docker compose up -d --build
+   ```
 
 4. Apply database migrations:
 
-```bash
-docker compose exec web python manage.py migrate
-```
+   ```bash
+   docker compose exec web python manage.py migrate
+   ```
 
 5. Open http://127.0.0.1:8000/tasks/
 
-## Run Tests
+## Automated Testing
+
+Run the test suite:
+
+```bash
+python manage.py test tasks
+```
+
+Or inside Docker:
 
 ```bash
 docker compose exec web python manage.py test tasks
 ```
 
-## Security
-
-- Environment variables for secrets
-- Authentication and task ownership permissions
-- Non-root Docker user
-- Production security configuration
-
-## Project Status
-
-Backend development completed.
-Public deployment is planned.
-
+The 20 tests cover API security, task ownership, dashboard search, status filtering, pagination, and task completion. GitHub Actions runs them automatically on pushes and pull requests.
 
 ## Application Screenshots
 
@@ -225,3 +185,7 @@ Public deployment is planned.
 ### Create Task
 
 ![Create Task](docs/screenshots/create-task.png)
+
+## Project Status
+
+Backend and frontend development are complete. Public deployment is planned.
