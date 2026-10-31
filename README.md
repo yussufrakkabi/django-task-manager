@@ -210,3 +210,18 @@ docker compose exec web python manage.py test tasks
 
 Backend development completed.
 Public deployment is planned.
+
+
+## Application Screenshots
+
+### Task Dashboard
+
+![Task Dashboard](docs/screenshots/dashboard.png)
+
+### Login Page
+
+![Login Page](docs/screenshots/login.png)
+
+### Create Task
+
+![Create Task](docs/screenshots/create-task.png)
